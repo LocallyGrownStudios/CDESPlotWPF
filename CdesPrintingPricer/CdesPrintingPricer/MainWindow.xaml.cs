@@ -193,7 +193,7 @@ namespace CdesPrintingPricer
                             incrementalDataSize += pageDifferentialDataSize;
                             double pageLength = mediabox.Height / postScriptPoints;
                             double pageWidth = mediabox.Width / postScriptPoints;
-                            if (mediabox.Height / postScriptPoints < mediabox.Height / postScriptPoints)
+                            if (mediabox.Height / postScriptPoints < mediabox.Width / postScriptPoints)
                             {
                                 if (mediabox.Height / postScriptPoints <= 42)
                                 {
@@ -202,8 +202,8 @@ namespace CdesPrintingPricer
                                     filePageSizes.Text += pageWidth / postScriptPoints;
                                     filePageSizes.Text += " , ";
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
-                                    CalculateCost(lengthToCharge);
                                     PageSizeBoxes(pageLength, pageWidth);
+                                    CalculateCost(lengthToCharge);
                                 }
                             }
                             else if (mediabox.Width / postScriptPoints <= 42)
@@ -215,8 +215,8 @@ namespace CdesPrintingPricer
                                     filePageSizes.Text += mediabox.Height / postScriptPoints;
                                     filePageSizes.Text += " , ";
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
-                                    CalculateCost(lengthToCharge);
                                     PageSizeBoxes(pageLength, pageWidth);
+                                    CalculateCost(lengthToCharge);
                                 }
                             }
 
@@ -244,17 +244,17 @@ namespace CdesPrintingPricer
                 double pageCostBond = ((lengthToCharge / 12) * costBond);
                 pageCostBond = Math.Round(pageCostBond, 2);
                 filePageSizes.Text += " Bond $ ";
-                filePageSizes.Text += string.Format ("{0:f2}", pageCostBond);
+                filePageSizes.Text += string.Format("{0:f2}", pageCostBond);
                 filePageSizes.Text += " , ";
                 double pageCostMatte = ((lengthToCharge / 12) * costMatte);
                 pageCostMatte = Math.Round(pageCostMatte, 2);
                 filePageSizes.Text += " Matte $ ";
-                filePageSizes.Text += string.Format ("{0:f2}", pageCostMatte);
+                filePageSizes.Text += string.Format("{0:f2}", pageCostMatte);
                 filePageSizes.Text += " , ";
                 double pageCostSatin = ((lengthToCharge / 12) * costSatin);
                 pageCostSatin = Math.Round(pageCostSatin, 2);
                 filePageSizes.Text += " Satin $ ";
-                filePageSizes.Text += string.Format ("{0:f2}", pageCostSatin);
+                filePageSizes.Text += string.Format("{0:f2}", pageCostSatin);
                 filePageSizes.Text += " , ";
             }
             catch (System.IO.IOException)
@@ -278,16 +278,26 @@ namespace CdesPrintingPricer
                 pageSizeBox.TextAlignment = TextAlignment.Center;
                 if (pageLength <= 42)
                 {
-                    if (pageLength < pageWidth)
+                    if (pageWidth <= 42)
                     {
-                        pageSizeBox.Text = pageLength + " x " + pageWidth;
+                        if (pageLength < pageWidth)
+                        {
+                            pageSizeBox.Text = pageLength + " x " + pageWidth;
+                        }
+                        else if (pageWidth <= 42)
+                        {
+                            pageSizeBox.Text = pageWidth + " x " + pageLength;
+                        }
+                    }
+                    stackPageSize.Children.Add(pageSizeBox);
+                }
+                else if (pageLength > 42)
+                {
+                    if (pageWidth > 42)
+                    {
+                        MessageBox.Show("One or more pages is too large. Currently the maximum printable size is 42 inches. Please check the file and try again.");
                     }
                 }
-                else
-                {
-                    pageSizeBox.Text = pageWidth + " x " + pageLength;
-                }
-                stackPageSize.Children.Add(pageSizeBox);
             }
             catch (System.IO.IOException)
             {
