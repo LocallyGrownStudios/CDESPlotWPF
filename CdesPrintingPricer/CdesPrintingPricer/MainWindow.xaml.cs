@@ -66,7 +66,7 @@ namespace CdesPrintingPricer
         {
             try
             {
-                stackPageSize.Children.Clear();
+                stackPageLayout.Children.Clear();
                 fileNameDisplay.Clear();
                 fileSizeDisplay.Clear();
                 numPagesDisplay.Clear();
@@ -196,11 +196,7 @@ namespace CdesPrintingPricer
                             if (mediabox.Height / postScriptPoints < mediabox.Width / postScriptPoints)
                             {
                                 if (mediabox.Height / postScriptPoints <= 42)
-                                {
-                                    filePageSizes.Text += pageLength / postScriptPoints;
-                                    filePageSizes.Text += " x ";
-                                    filePageSizes.Text += pageWidth / postScriptPoints;
-                                    filePageSizes.Text += " , ";
+                                {                    
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
                                     PageSizeBoxes(pageLength, pageWidth);
                                     CalculateCost(lengthToCharge);
@@ -209,11 +205,6 @@ namespace CdesPrintingPricer
                             else if (mediabox.Width / postScriptPoints <= 42)
                             {
                                 {
-
-                                    filePageSizes.Text += mediabox.Width / postScriptPoints;
-                                    filePageSizes.Text += " x ";
-                                    filePageSizes.Text += mediabox.Height / postScriptPoints;
-                                    filePageSizes.Text += " , ";
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
                                     PageSizeBoxes(pageLength, pageWidth);
                                     CalculateCost(lengthToCharge);
@@ -243,19 +234,13 @@ namespace CdesPrintingPricer
             {
                 double pageCostBond = ((lengthToCharge / 12) * costBond);
                 pageCostBond = Math.Round(pageCostBond, 2);
-                filePageSizes.Text += " Bond $ ";
                 filePageSizes.Text += string.Format("{0:f2}", pageCostBond);
-                filePageSizes.Text += " , ";
                 double pageCostMatte = ((lengthToCharge / 12) * costMatte);
                 pageCostMatte = Math.Round(pageCostMatte, 2);
-                filePageSizes.Text += " Matte $ ";
                 filePageSizes.Text += string.Format("{0:f2}", pageCostMatte);
-                filePageSizes.Text += " , ";
                 double pageCostSatin = ((lengthToCharge / 12) * costSatin);
                 pageCostSatin = Math.Round(pageCostSatin, 2);
-                filePageSizes.Text += " Satin $ ";
                 filePageSizes.Text += string.Format("{0:f2}", pageCostSatin);
-                filePageSizes.Text += " , ";
             }
             catch (System.IO.IOException)
             {
@@ -289,7 +274,7 @@ namespace CdesPrintingPricer
                             pageSizeBox.Text = pageWidth + " x " + pageLength;
                         }
                     }
-                    stackPageSize.Children.Add(pageSizeBox);
+                    stackPageLayout.Children.Add(pageSizeBox);
                 }
                 else if (pageLength > 42)
                 {
