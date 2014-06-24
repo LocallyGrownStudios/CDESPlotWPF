@@ -26,6 +26,20 @@ using org.pdfclown.documents.interaction;
 using org.pdfclown.documents.interchange.metadata;
 using org.pdfclown.documents.interaction.viewer;
 
+// TO DO
+// Add Radial Buttons for Pricing
+// Add Pdf Portfolio Support
+// Add Price Boxes
+// Add functionality to manually enter data, a calculator
+// Add functionality for multiple file selection, place in own container for auto population
+// Add functionality to populate individual containers for each file
+// Add functionality to select different papers for different files
+// Add functionality for laser printer prices
+// Add functionality to save file as reduced size, rasterized and x1-a compatible
+// ** possible page viewer
+// ** Possible functionality to submit plots/prints
+// ** Possible functionality to charge themselves for plots/prints
+
 namespace CdesPrintingPricer
 {
 
@@ -228,16 +242,19 @@ namespace CdesPrintingPricer
             try
             {
                 double pageCostBond = ((lengthToCharge / 12) * costBond);
+                pageCostBond = Math.Round(pageCostBond, 2);
                 filePageSizes.Text += " Bond $ ";
-                filePageSizes.Text += pageCostBond;
+                filePageSizes.Text += string.Format ("{0:f2}", pageCostBond);
                 filePageSizes.Text += " , ";
                 double pageCostMatte = ((lengthToCharge / 12) * costMatte);
+                pageCostMatte = Math.Round(pageCostMatte, 2);
                 filePageSizes.Text += " Matte $ ";
-                filePageSizes.Text += pageCostMatte;
+                filePageSizes.Text += string.Format ("{0:f2}", pageCostMatte);
                 filePageSizes.Text += " , ";
                 double pageCostSatin = ((lengthToCharge / 12) * costSatin);
+                pageCostSatin = Math.Round(pageCostSatin, 2);
                 filePageSizes.Text += " Satin $ ";
-                filePageSizes.Text += pageCostSatin;
+                filePageSizes.Text += string.Format ("{0:f2}", pageCostSatin);
                 filePageSizes.Text += " , ";
             }
             catch (System.IO.IOException)
@@ -249,15 +266,16 @@ namespace CdesPrintingPricer
         private void PageSizeBoxes(double pageLength, double pageWidth)
         {
             try
-            { 
+            {
                 int pageBoxNum = 0;
                 pageBoxNum++;
                 TextBox pageSizeBox = new TextBox();
-                pageSizeBox.IsEnabled = false;
+                pageSizeBox.IsReadOnly = true;
                 pageSizeBox.Name = "pageSizeBox_" + pageBoxNum;
-                pageSizeBox.Width = 50;
+                pageSizeBox.Width = 75;
                 pageSizeBox.Height = 25;
-                pageSizeBox.Margin = new Thickness(-50, 10, 0, 0);
+                pageSizeBox.Margin = new Thickness(-25, 10, 0, 0);
+                pageSizeBox.TextAlignment = TextAlignment.Center;
                 if (pageLength <= 42)
                 {
                     if (pageLength < pageWidth)
@@ -271,12 +289,10 @@ namespace CdesPrintingPricer
                 }
                 stackPageSize.Children.Add(pageSizeBox);
             }
-            catch
+            catch (System.IO.IOException)
             {
-
+                MessageBox.Show("There was a problem calculating the page Sizes. Please check the file and try again.");
             }
         }
-
-
     }
 }
