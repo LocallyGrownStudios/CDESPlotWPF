@@ -11,7 +11,7 @@
         <TextBox x:Name="fileNameDisplay" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" VerticalAlignment="Top" Width="147" IsReadOnly="True"/>
         <TextBox x:Name="fileSizeDisplay" HorizontalAlignment="Left" Height="23" Margin="162,10,0,0" VerticalAlignment="Top" Width="59" IsReadOnly="True" TextAlignment="Center"/>
         <TextBox x:Name="numPagesDisplay" HorizontalAlignment="Left" Height="23" Margin="226,10,0,0" VerticalAlignment="Top" Width="26" IsReadOnly="True" TextAlignment="Center"/>
-        <RadioButton x:Name="chooseBond" Content="Bond" HorizontalAlignment="Left" Margin="10,44,0,0" VerticalAlignment="Top"/>
+        <RadioButton x:Name="chooseBond" Content="Bond" HorizontalAlignment="Left" Margin="10,44,0,0" VerticalAlignment="Top" Checked="chooseBond_Checked"/>
         <Grid x:Name="rootButtonLayout" Width="44" Margin="10,76,312,10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -33,8 +33,8 @@
             </Grid.RowDefinitions>
             <StackPanel x:Name="stackCostLayout" Grid.Row="0" Orientation="Vertical" Background="WhiteSmoke" />
         </Grid>
-        <RadioButton x:Name="chooseMatte" Content="Matte" HorizontalAlignment="Left" Margin="110,44,0,0" VerticalAlignment="Top"/>
-        <RadioButton x:Name="chooseSatin" Content="Satin" HorizontalAlignment="Left" Margin="210,44,0,0" VerticalAlignment="Top"/>
+        <RadioButton x:Name="chooseMatte" Content="Matte" HorizontalAlignment="Left" Margin="110,44,0,0" VerticalAlignment="Top" Checked="chooseMatte_Checked"/>
+        <RadioButton x:Name="chooseSatin" Content="Satin" HorizontalAlignment="Left" Margin="210,44,0,0" VerticalAlignment="Top" Checked="chooseSatin_Checked"/>
 
     </Grid>
 </Window>

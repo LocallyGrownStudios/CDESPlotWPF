@@ -297,6 +297,8 @@ namespace CdesPrintingPricer
             pageSelect.Name = "pageSelectButton_" + pageCheckNum++;
             pageSelect.HorizontalAlignment = HorizontalAlignment.Center;
             pageSelect.Margin = new Thickness(0, 18.5, 0, 0);
+            pageSelect.AddHandler(CheckBox.CheckedEvent, new RoutedEventHandler(pageCost_Checked));
+            pageSelect.AddHandler(CheckBox.UncheckedEvent, new RoutedEventHandler(pageCost_Unchecked));
             stackButtonLayout.Children.Add(pageSelect);
 
         }
@@ -318,21 +320,36 @@ namespace CdesPrintingPricer
                     pageCost.TextWrapping = TextWrapping.NoWrap;
                     pageCost.Margin = new Thickness(-25, 10, 0, 0);
                     pageCost.Text = "";
-                    pageCost.AddHandler(CheckBox.CheckedEvent, new RoutedEventHandler(pageCostChecked));
-                    pageCost.AddHandler(CheckBox.CheckedEvent, new RoutedEventHandler(pageCostUnchecked));
                     stackCostLayout.Children.Add(pageCost);
                 }
             }
         }
 
-        private void pageCostChecked(object sender, RoutedEventArgs e)
+        private void pageCost_Checked(object sender, RoutedEventArgs e)
         {
+            {
 
+            }
         }
 
-        private void pageCostUnchecked(object sender, RoutedEventArgs e)
+        private void pageCost_Unchecked(object sender, RoutedEventArgs e)
         {
+        }
 
+
+        private void chooseBond_Checked(object sender, RoutedEventArgs e)
+        {
+            double selectedPaperCost = costBond;
+        }
+
+        private void chooseMatte_Checked(object sender, RoutedEventArgs e)
+        {
+            double selectedPaperCost = costMatte;
+        }
+
+        private void chooseSatin_Checked(object sender, RoutedEventArgs e)
+        {
+            double selectedPaperCost = costSatin;
         }
 
     }
