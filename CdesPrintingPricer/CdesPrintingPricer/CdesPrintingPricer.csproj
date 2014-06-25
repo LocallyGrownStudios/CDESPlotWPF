@@ -34,6 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DevComponents.WPF.Controls, Version=7.5.0.12, Culture=neutral, PublicKeyToken=65042117d0a83cbc, processorArchitecture=MSIL" />
     <Reference Include="itextsharp">
       <HintPath>D:\Documents\iTextSharp\itextsharp.dll</HintPath>
     </Reference>

@@ -68,10 +68,10 @@ namespace CdesPrintingPricer
             {
                 stackPageLayout.Children.Clear();
                 stackButtonLayout.Children.Clear();
+                stackCostLayout.Children.Clear();
                 fileNameDisplay.Clear();
                 fileSizeDisplay.Clear();
                 numPagesDisplay.Clear();
-                filePageSizes.Clear();
                 dlg.InitialDirectory = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 dlg.Filter = "PDF Files (*.pdf)|*.pdf|All files (*.*)|*.*";
                 dlg.FilterIndex = 1;
@@ -95,7 +95,7 @@ namespace CdesPrintingPricer
         {
             try
             {
-                string fileName = dlg.FileName;
+                string fileName = dlg.SafeFileName;
                 fileNameDisplay.Clear();
                 fileNameDisplay.Text += fileName;
             }
@@ -121,24 +121,20 @@ namespace CdesPrintingPricer
                 if (sizeGB >= 1)
                 {
                     fileSizeDisplay.Clear();
-                    fileSizeDisplay.TextAlignment = TextAlignment.Right;
-                    fileSizeDisplay.Text += sizeGB;
-                    fileSizeDisplay.Text += " GB";
+                    fileSizeDisplay.TextAlignment = TextAlignment.Center;
+                    fileSizeDisplay.Text += sizeGB + " GB";
                 }
                 else if (sizeMB >= 1)
                 {
                     fileSizeDisplay.Clear();
-                    fileSizeDisplay.TextAlignment = TextAlignment.Right;
-                    fileSizeDisplay.Text += sizeMB;
-                    fileSizeDisplay.Text += " MB";
-
+                    fileSizeDisplay.TextAlignment = TextAlignment.Center;
+                    fileSizeDisplay.Text += sizeMB + " MB";
                 }
                 else
                 {
                     fileSizeDisplay.Clear();
-                    fileSizeDisplay.TextAlignment = TextAlignment.Right;
-                    fileSizeDisplay.Text += sizeKB;
-                    fileSizeDisplay.Text += " KB";
+                    fileSizeDisplay.TextAlignment = TextAlignment.Center;
+                    fileSizeDisplay.Text += sizeKB + " KB";
                 }
             }
             catch (System.IO.IOException)
@@ -205,6 +201,7 @@ namespace CdesPrintingPricer
                                     {
                                         PageSelectButtons(true);
                                     }
+                                    PageCostBoxes(documentPageCount);
                                 }
                             }
                             else if (mediabox.Width / postScriptPoints <= 42)
@@ -217,7 +214,7 @@ namespace CdesPrintingPricer
                                     {
                                         PageSelectButtons(true);
                                     }
-                                    
+                                    PageCostBoxes(documentPageCount);
                                 }
                             }
 
@@ -244,13 +241,11 @@ namespace CdesPrintingPricer
             {
                 double pageCostBond = ((lengthToCharge / 12) * costBond);
                 pageCostBond = Math.Round(pageCostBond, 2);
-                filePageSizes.Text += string.Format("{0:f2}", pageCostBond);
                 double pageCostMatte = ((lengthToCharge / 12) * costMatte);
                 pageCostMatte = Math.Round(pageCostMatte, 2);
-                filePageSizes.Text += string.Format("{0:f2}", pageCostMatte);
                 double pageCostSatin = ((lengthToCharge / 12) * costSatin);
                 pageCostSatin = Math.Round(pageCostSatin, 2);
-                filePageSizes.Text += string.Format("{0:f2}", pageCostSatin);
+
             }
             catch (System.IO.IOException)
             {
@@ -263,12 +258,12 @@ namespace CdesPrintingPricer
             try
             {
                 int pageBoxNum = 0;
-                pageBoxNum++;
                 TextBox pageSizeBox = new TextBox();
                 pageSizeBox.IsReadOnly = true;
-                pageSizeBox.Name = "pageSizeBox_" + pageBoxNum;
+                pageSizeBox.Name = "pageSizeBox_" + pageBoxNum++;
                 pageSizeBox.Width = 75;
                 pageSizeBox.Height = 25;
+                pageSizeBox.TextWrapping = TextWrapping.NoWrap;
                 pageSizeBox.Margin = new Thickness(-25, 10, 0, 0);
                 pageSizeBox.TextAlignment = TextAlignment.Center;
                 if (pageLength < pageWidth)
@@ -298,17 +293,47 @@ namespace CdesPrintingPricer
         private void PageSelectButtons(bool pageSelectButton)
         {
             int pageCheckNum = 0;
-            pageCheckNum++;
             CheckBox pageSelect = new CheckBox();
+            pageSelect.Name = "pageSelectButton_" + pageCheckNum++;
             pageSelect.HorizontalAlignment = HorizontalAlignment.Center;
             pageSelect.Margin = new Thickness(0, 18.5, 0, 0);
             stackButtonLayout.Children.Add(pageSelect);
 
         }
 
-        private void PageCostBoxes()
+        private void PageCostBoxes(int documentPageCount)
+        {
+
+            int pageCostNum = 0;
+            if (documentPageCount >= 1)
+            {
+                foreach (TextBox pageSizeBox in stackPageLayout.Children.OfType<TextBox>().Where(t => t.Name.Equals("pageSizeBox_" + pageCostNum++)))
+                {
+                    TextBox pageCost = new TextBox();
+                    pageCost.Name = "pageCostBox_" + pageCostNum++;
+                    pageCost.HorizontalAlignment = HorizontalAlignment.Center;
+                    pageCost.TextAlignment = TextAlignment.Center;
+                    pageCost.Width = 75;
+                    pageCost.Height = 25;
+                    pageCost.TextWrapping = TextWrapping.NoWrap;
+                    pageCost.Margin = new Thickness(-25, 10, 0, 0);
+                    pageCost.Text = "";
+                    pageCost.AddHandler(CheckBox.CheckedEvent, new RoutedEventHandler(pageCostChecked));
+                    pageCost.AddHandler(CheckBox.CheckedEvent, new RoutedEventHandler(pageCostUnchecked));
+                    stackCostLayout.Children.Add(pageCost);
+                }
+            }
+        }
+
+        private void pageCostChecked(object sender, RoutedEventArgs e)
         {
 
         }
+
+        private void pageCostUnchecked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
     }
 }
