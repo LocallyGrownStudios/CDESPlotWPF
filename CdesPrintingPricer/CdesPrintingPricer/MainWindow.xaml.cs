@@ -67,6 +67,7 @@ namespace CdesPrintingPricer
             try
             {
                 stackPageLayout.Children.Clear();
+                stackButtonLayout.Children.Clear();
                 fileNameDisplay.Clear();
                 fileSizeDisplay.Clear();
                 numPagesDisplay.Clear();
@@ -196,10 +197,14 @@ namespace CdesPrintingPricer
                             if (mediabox.Height / postScriptPoints < mediabox.Width / postScriptPoints)
                             {
                                 if (mediabox.Height / postScriptPoints <= 42)
-                                {                    
+                                {
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
                                     PageSizeBoxes(pageLength, pageWidth);
                                     CalculateCost(lengthToCharge);
+                                    if (documentPageCount > 1)
+                                    {
+                                        PageSelectButtons(true);
+                                    }
                                 }
                             }
                             else if (mediabox.Width / postScriptPoints <= 42)
@@ -208,6 +213,11 @@ namespace CdesPrintingPricer
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
                                     PageSizeBoxes(pageLength, pageWidth);
                                     CalculateCost(lengthToCharge);
+                                    if (documentPageCount > 1)
+                                    {
+                                        PageSelectButtons(true);
+                                    }
+                                    
                                 }
                             }
 
@@ -261,33 +271,44 @@ namespace CdesPrintingPricer
                 pageSizeBox.Height = 25;
                 pageSizeBox.Margin = new Thickness(-25, 10, 0, 0);
                 pageSizeBox.TextAlignment = TextAlignment.Center;
-                if (pageLength <= 42)
+                if (pageLength < pageWidth)
                 {
-                    if (pageWidth <= 42)
+                    if (pageLength <= 42)
                     {
-                        if (pageLength < pageWidth)
-                        {
-                            pageSizeBox.Text = pageLength + " x " + pageWidth;
-                        }
-                        else if (pageWidth <= 42)
-                        {
-                            pageSizeBox.Text = pageWidth + " x " + pageLength;
-                        }
+                        pageSizeBox.Text = pageLength + " x " + pageWidth;
+                        stackPageLayout.Children.Add(pageSizeBox);
                     }
+                }
+                else if (pageWidth <= 42)
+                {
+                    pageSizeBox.Text = pageWidth + " x " + pageLength;
                     stackPageLayout.Children.Add(pageSizeBox);
                 }
-                else if (pageLength > 42)
+                else
                 {
-                    if (pageWidth > 42)
-                    {
-                        MessageBox.Show("One or more pages is too large. Currently the maximum printable size is 42 inches. Please check the file and try again.");
-                    }
+                    MessageBox.Show("One or more pages is too large. Currently the maximum printable size is 42 inches. Please check the file and try again.");
                 }
             }
             catch (System.IO.IOException)
             {
                 MessageBox.Show("There was a problem calculating the page Sizes. Please check the file and try again.");
             }
+        }
+
+        private void PageSelectButtons(bool pageSelectButton)
+        {
+            int pageCheckNum = 0;
+            pageCheckNum++;
+            CheckBox pageSelect = new CheckBox();
+            pageSelect.HorizontalAlignment = HorizontalAlignment.Center;
+            pageSelect.Margin = new Thickness(0, 18.5, 0, 0);
+            stackButtonLayout.Children.Add(pageSelect);
+
+        }
+
+        private void PageCostBoxes()
+        {
+
         }
     }
 }
