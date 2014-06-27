@@ -31,7 +31,7 @@ using System.ComponentModel;
 
 // TO DO
 // Add Pdf Portfolio Support
-// Add Price Boxes
+// Add Total Cost Box
 // Add functionality to manually enter data, a calculator
 // Add functionality for multiple file selection, place in own container for auto population
 // Add functionality to populate individual containers for each file
@@ -308,7 +308,7 @@ namespace CdesPrintingPricer
         }
 
 
-        private void pageCost_Checked(object sender, RoutedEventArgs e)
+        public void pageCost_Checked(object sender, RoutedEventArgs e)
         {
             var pageBox = sender as CheckBox;
             var pageLayout = pageBox.Parent as FrameworkElement;
@@ -316,34 +316,34 @@ namespace CdesPrintingPricer
             string nameId;
             nameId = Regex.Match(name, @"\d+").Value;
             int i = Convert.ToInt32(nameId);
-            CalculateCost(nameId, i);
+            CalculateCost(i);
         }
 
 
-        private void CalculateCost  (string nameId, int i)
+        private void CalculateCost(int i)
         {
-                TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
-                i--;
-                TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+            TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
+            i--;
+            TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+            {
+                if (chooseBond.IsChecked == true)
                 {
-                    if (chooseBond.IsChecked == true)
-                    {
-                        double totalPageCost = costBond * (Convert.ToDouble(lengthToCharge) / 12);
-                        pageCostBox.Text = Convert.ToString(totalPageCost);
-                    }
+                    double totalPageCost = costBond * (Convert.ToDouble(lengthToCharge) / 12);
+                    pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                }
 
-                    if (chooseMatte.IsChecked == true)
-                    {
-                        double totalPageCost = costMatte * (Convert.ToDouble(lengthToCharge) / 12);
-                        pageCostBox.Text = Convert.ToString(totalPageCost);
-                    }
+                else if (chooseMatte.IsChecked == true)
+                {
+                    double totalPageCost = costMatte * (Convert.ToDouble(lengthToCharge) / 12);
+                    pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                }
 
-                    if (chooseSatin.IsChecked == true)
-                    {
-                        double totalPageCost = costSatin * (Convert.ToDouble(lengthToCharge) / 12);
-                        pageCostBox.Text = Convert.ToString(totalPageCost);
-                    }
-                
+                else if (chooseSatin.IsChecked == true)
+                {
+                    double totalPageCost = costSatin * (Convert.ToDouble(lengthToCharge) / 12);
+                    pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                }
+
             }
         }
 
@@ -363,6 +363,7 @@ namespace CdesPrintingPricer
             TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
             i--;
             TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+            i++;
             {
                 pageCostBox.Clear();
             }
@@ -375,31 +376,80 @@ namespace CdesPrintingPricer
                 i--;
                 TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
                 {
-                    pageCostBox.Text = "Worked";
+                    if (pageCostBox.Text != "")
+                    {
+                        if (chooseBond.IsChecked == true)
+                        {
+                            double totalPageCost = costBond * (Convert.ToDouble(lengthToCharge) / 12);
+                            pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                        }
+
+                        else if (chooseMatte.IsChecked == true)
+                        {
+                            double totalPageCost = costMatte * (Convert.ToDouble(lengthToCharge) / 12);
+                            pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                        }
+
+                        else if (chooseSatin.IsChecked == true)
+                        {
+                            double totalPageCost = costSatin * (Convert.ToDouble(lengthToCharge) / 12);
+                            pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                        }
+                    }
                 }
             }
         }
 
         private void chooseBond_Checked(object sender, RoutedEventArgs e)
         {
+            int i = 0;
             if (lengthToCharge != null)
             {
+                foreach (TextBox pageCostBox in stackCostLayout.Children)
+                {
+
+                    UpdateCost(i);
+                    i++;
+
+                }
             }
-       
+
+
+
         }
 
         private void chooseMatte_Checked(object sender, RoutedEventArgs e)
         {
             if (dlg.FileName != null)
             {
+                int i = 0;
+                if (lengthToCharge != null)
+                {
+                    foreach (TextBox pageCostBox in stackCostLayout.Children)
+                    {
+                        UpdateCost(i);
+                        i++;
+                    }
+                }
             }
-            
+
         }
 
         private void chooseSatin_Checked(object sender, RoutedEventArgs e)
         {
             if (dlg.FileName != null)
             {
+                int i = 0;
+                if (lengthToCharge != null)
+                {
+                    foreach (TextBox pageCostBox in stackCostLayout.Children)
+                    {
+
+                        UpdateCost(i);
+                        i++;
+
+                    }
+                }
             }
         }
 
