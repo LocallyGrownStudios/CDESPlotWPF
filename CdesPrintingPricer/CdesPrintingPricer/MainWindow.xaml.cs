@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Web;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
@@ -196,7 +198,6 @@ namespace CdesPrintingPricer
                                 {
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
                                     PageSizeBoxes(pageLength, pageWidth);
-                                    CalculateCost(lengthToCharge);
                                     if (documentPageCount > 1)
                                     {
                                         PageSelectButtons(true);
@@ -209,7 +210,6 @@ namespace CdesPrintingPricer
                                 {
                                     double lengthToCharge = mediabox.Height / postScriptPoints;
                                     PageSizeBoxes(pageLength, pageWidth);
-                                    CalculateCost(lengthToCharge);
                                     if (documentPageCount > 1)
                                     {
                                         PageSelectButtons(true);
@@ -245,6 +245,8 @@ namespace CdesPrintingPricer
                 pageCostMatte = Math.Round(pageCostMatte, 2);
                 double pageCostSatin = ((lengthToCharge / 12) * costSatin);
                 pageCostSatin = Math.Round(pageCostSatin, 2);
+                outputDebug.Text = "it works, well maybe";
+
 
             }
             catch (System.IO.IOException)
@@ -257,15 +259,15 @@ namespace CdesPrintingPricer
         {
             try
             {
-                int pageBoxNum = 0;
                 TextBox pageSizeBox = new TextBox();
                 pageSizeBox.IsReadOnly = true;
-                pageSizeBox.Name = "pageSizeBox_" + pageBoxNum++;
+                pageSizeBox.Name = "pageSizeBox_" + stackPageLayout.Children.Count;
                 pageSizeBox.Width = 75;
                 pageSizeBox.Height = 25;
                 pageSizeBox.TextWrapping = TextWrapping.NoWrap;
                 pageSizeBox.Margin = new Thickness(-25, 10, 0, 0);
                 pageSizeBox.TextAlignment = TextAlignment.Center;
+                this.RegisterName(string.Format("pageSizeBox_" + stackCostLayout.Children.Count), pageSizeBox);
                 if (pageLength < pageWidth)
                 {
                     if (pageLength <= 42)
@@ -292,9 +294,9 @@ namespace CdesPrintingPricer
 
         private void PageSelectButtons(bool pageSelectButton)
         {
-            int pageCheckNum = 0;
             CheckBox pageSelect = new CheckBox();
-            pageSelect.Name = "pageSelectButton_" + pageCheckNum++;
+            pageSelect.Name = "pageSelectButton_" + stackButtonLayout.Children.Count;
+            string pageID = pageSelect.Name;
             pageSelect.HorizontalAlignment = HorizontalAlignment.Center;
             pageSelect.Margin = new Thickness(0, 18.5, 0, 0);
             pageSelect.AddHandler(CheckBox.CheckedEvent, new RoutedEventHandler(pageCost_Checked));
@@ -305,14 +307,12 @@ namespace CdesPrintingPricer
 
         private void PageCostBoxes(int documentPageCount)
         {
-
-            int pageCostNum = 0;
             if (documentPageCount >= 1)
             {
-                foreach (TextBox pageSizeBox in stackPageLayout.Children.OfType<TextBox>().Where(t => t.Name.Equals("pageSizeBox_" + pageCostNum++)))
+                foreach (TextBox pageSizeBox in stackPageLayout.Children.OfType<TextBox>().Where(t => t.Name.Equals("pageSizeBox_" + stackCostLayout.Children.Count)))
                 {
                     TextBox pageCost = new TextBox();
-                    pageCost.Name = "pageCostBox_" + pageCostNum++;
+                    pageCost.Name = "pageCostBox_" + stackCostLayout.Children.Count;
                     pageCost.HorizontalAlignment = HorizontalAlignment.Center;
                     pageCost.TextAlignment = TextAlignment.Center;
                     pageCost.Width = 75;
@@ -321,21 +321,44 @@ namespace CdesPrintingPricer
                     pageCost.Margin = new Thickness(-25, 10, 0, 0);
                     pageCost.Text = "";
                     stackCostLayout.Children.Add(pageCost);
+                    this.RegisterName(string.Format("pageCostBox_" + stackCostLayout.Children.Count), pageCost);
                 }
             }
         }
 
+
         private void pageCost_Checked(object sender, RoutedEventArgs e)
         {
+            if (sender != null)
             {
+                int i = 0;
+                var pageBox = sender as CheckBox;
+                var pageLayout = pageBox.Parent as FrameworkElement;
+                var name = (((CheckBox)sender).Name);
+                string nameId;
+                nameId = Regex.Match(name, @"\d+").Value;
+                GetCostBoxName(nameId);
+            }
+        }
+
+        private void GetCostBoxName(string nameId)
+        {
+            int i = Convert.ToInt32(nameId);
+            TextBox pageCost = (TextBox)this.FindName(string.Format("pageCostBox_{0}" , i + 1));
+            i--;
+            TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+            {
+                string costboxName = pageCost.Name;
+                string pageBox = pageSizeBox.Name;
+                outputDebug.Text = costboxName + " , " + pageBox ;
 
             }
         }
 
         private void pageCost_Unchecked(object sender, RoutedEventArgs e)
         {
+            outputDebug.Clear();
         }
-
 
         private void chooseBond_Checked(object sender, RoutedEventArgs e)
         {
@@ -352,5 +375,11 @@ namespace CdesPrintingPricer
             double selectedPaperCost = costSatin;
         }
 
+        private void fileNameDisplay_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        public double lengthToCharge { get; set; }
     }
 }
