@@ -326,9 +326,6 @@ namespace CdesPrintingPricer
                 i--;
                 TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
                 {
-                    string costboxName = pageCostBox.Name;
-                    string pageBoxName = pageSizeBox.Name;
-
                     if (chooseBond.IsChecked == true)
                     {
                         double totalPageCost = costBond * (Convert.ToDouble(lengthToCharge) / 12);
@@ -352,21 +349,58 @@ namespace CdesPrintingPricer
 
         private void pageCost_Unchecked(object sender, RoutedEventArgs e)
         {
+            var pageBox = sender as CheckBox;
+            var pageLayout = pageBox.Parent as FrameworkElement;
+            var name = (((CheckBox)sender).Name);
+            string nameId;
+            nameId = Regex.Match(name, @"\d+").Value;
+            int i = Convert.ToInt32(nameId);
+            ClearCost(nameId, i);
+        }
+
+        private void ClearCost(string nameId, int i)
+        {
+            TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
+            i--;
+            TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+            {
+                pageCostBox.Clear();
+            }
+        }
+
+        private void UpdateCost(int i)
+        {
+            {
+                TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
+                i--;
+                TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+                {
+                    pageCostBox.Text = "Worked";
+                }
+            }
         }
 
         private void chooseBond_Checked(object sender, RoutedEventArgs e)
         {
-            pageCost_Checked(sender, e);
+            if (lengthToCharge != null)
+            {
+            }
+       
         }
 
         private void chooseMatte_Checked(object sender, RoutedEventArgs e)
         {
-            pageCost_Checked(sender, e);
+            if (dlg.FileName != null)
+            {
+            }
+            
         }
 
         private void chooseSatin_Checked(object sender, RoutedEventArgs e)
         {
-            pageCost_Checked(sender, e);
+            if (dlg.FileName != null)
+            {
+            }
         }
 
         private void fileNameDisplay_TextChanged(object sender, TextChangedEventArgs e)
