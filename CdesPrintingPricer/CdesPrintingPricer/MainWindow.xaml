@@ -36,6 +36,7 @@
         </Grid>
         <RadioButton x:Name="chooseMatte" Content="Matte" HorizontalAlignment="Left" Margin="110,44,0,0" VerticalAlignment="Top" Checked="chooseMatte_Checked"/>
         <RadioButton x:Name="chooseSatin" Content="Satin" HorizontalAlignment="Left" Margin="210,44,0,0" VerticalAlignment="Top" Checked="chooseSatin_Checked"/>
+        <TextBox x:Name="debugOutput" HorizontalAlignment="Left" Height="189" Margin="257,60,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
 
     </Grid>
 </Window>
