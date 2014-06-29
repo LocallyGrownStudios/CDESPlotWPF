@@ -1,33 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Net;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Web;
-using iTextSharp.text;
 using iTextSharp.text.pdf;
-using iTextSharp.text.pdf.parser;
 using org.pdfclown.files;
 using org.pdfclown.objects;
 using org.pdfclown.tools;
 using org.pdfclown.documents;
-using org.pdfclown.documents.contents;
-using org.pdfclown.documents.contents.objects;
-using org.pdfclown.documents.interaction;
-using org.pdfclown.documents.interchange.metadata;
-using org.pdfclown.documents.interaction.viewer;
-using System.ComponentModel;
+using io = System.IO;
 
 // TO DO
 // Add Pdf Portfolio Support
@@ -48,13 +30,16 @@ namespace CdesPrintingPricer
     public partial class MainWindow : Window
     {
 
+        int i;
+        string nameId;
         double costSatin = 3.00;
         double costMatte = 3.00;
         double costBond = 1.00;
+        double totalPageCost;
+        decimal finalPageCost;
         const double postScriptPoints = 72.00;
         Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-        string lengthToCharge;
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -72,6 +57,7 @@ namespace CdesPrintingPricer
                 stackPageLayout.Children.Clear();
                 stackButtonLayout.Children.Clear();
                 stackCostLayout.Children.Clear();
+                stackTotalCost.Children.Clear();
                 fileNameDisplay.Clear();
                 fileSizeDisplay.Clear();
                 numPagesDisplay.Clear();
@@ -112,11 +98,14 @@ namespace CdesPrintingPricer
         {
             try
             {
-                string text = System.IO.File.ReadAllText(dlg.FileName);
-                int size = text.Length;
-                double sizeKB = text.Length / 1024;
-                double sizeMB = sizeKB / 1024;
-                double sizeGB = sizeMB / 1024;
+                double sizeKB = 0;
+                double sizeMB = 0;
+                double sizeGB = 0;
+                long text = new io::FileInfo(dlg.FileName).Length;
+                double sizeBytes = Convert.ToDouble(text);
+                sizeKB = sizeBytes / 1024;
+                sizeMB = sizeKB / 1024;
+                sizeGB = sizeMB / 1024;
                 sizeKB = Math.Round(sizeKB, 2);
                 sizeGB = Math.Round(sizeGB, 2);
                 sizeMB = Math.Round(sizeMB, 2);
@@ -193,42 +182,17 @@ namespace CdesPrintingPricer
                             incrementalDataSize += pageDifferentialDataSize;
                             double pageLength = mediabox.Height / postScriptPoints;
                             double pageWidth = mediabox.Width / postScriptPoints;
-                            if (mediabox.Height / postScriptPoints < mediabox.Width / postScriptPoints)
+                            PageSizeBoxes(pageLength, pageWidth);
+                            if (documentPageCount > 1)
                             {
-                                if (mediabox.Height / postScriptPoints <= 42)
-                                {
-                                    lengthToCharge = Convert.ToString(mediabox.Height / postScriptPoints);
-                                    PageSizeBoxes(pageLength, pageWidth);
-                                    if (documentPageCount > 1)
-                                    {
-                                        PageSelectButtons(true);
-                                    }
-                                    PageCostBoxes(documentPageCount);
-                                }
+                                PageSelectButtons(true);
                             }
-                            else if (mediabox.Width / postScriptPoints <= 42)
-                            {
-                                {
-                                    lengthToCharge = Convert.ToString(mediabox.Height / postScriptPoints);
-                                    PageSizeBoxes(pageLength, pageWidth);
-                                    if (documentPageCount > 1)
-                                    {
-                                        PageSelectButtons(true);
-                                    }
-                                    PageCostBoxes(documentPageCount);
-                                }
-                            }
-
-                            else if (mediabox.Height / postScriptPoints > 42)
-                            {
-                                if (mediabox.Width / postScriptPoints > 42)
-                                {
-                                    MessageBox.Show("One or more pages is too large. Currently the maximum printable size is 42 inches.");
-                                }
-                            }
+                            PageCostBoxes(documentPageCount);
                         }
                     }
+                    TotalCostBox();
                 }
+
                 catch (System.IO.IOException)
                 {
                     MessageBox.Show("There was a problem reading the page sizes. Please check the file and try again.");
@@ -248,20 +212,28 @@ namespace CdesPrintingPricer
                 pageSizeBox.TextWrapping = TextWrapping.NoWrap;
                 pageSizeBox.Margin = new Thickness(-25, 10, 0, 0);
                 pageSizeBox.TextAlignment = TextAlignment.Center;
-                this.RegisterName(string.Format("pageSizeBox_" + stackCostLayout.Children.Count), pageSizeBox);
-                if (pageLength < pageWidth)
+                if (FindName("pageSizeBox_" + stackPageLayout.Children.Count) != null)
                 {
-                    if (pageLength <= 42)
+                    UnregisterName("pageSizeBox_" + stackPageLayout.Children.Count);
+                }
+                this.RegisterName(string.Format("pageSizeBox_" + stackCostLayout.Children.Count), pageSizeBox);
+                if (pageLength > pageWidth)
+                {
+                    if (pageWidth <= 42)
                     {
                         pageSizeBox.Text = pageLength + " x " + pageWidth;
                         stackPageLayout.Children.Add(pageSizeBox);
                     }
                 }
-                else if (pageWidth <= 42)
+                else if (pageWidth > pageLength)
                 {
-                    pageSizeBox.Text = pageWidth + " x " + pageLength;
-                    stackPageLayout.Children.Add(pageSizeBox);
+                    if (pageLength <= 42)
+                    {
+                        pageSizeBox.Text = pageWidth + " x " + pageLength;
+                        stackPageLayout.Children.Add(pageSizeBox);
+                    }
                 }
+
                 else
                 {
                     MessageBox.Show("One or more pages is too large. Currently the maximum printable size is 42 inches. Please check the file and try again.");
@@ -271,6 +243,20 @@ namespace CdesPrintingPricer
             {
                 MessageBox.Show("There was a problem calculating the page Sizes. Please check the file and try again.");
             }
+        }
+
+        private void TotalCostBox()
+        {
+            TextBox totalCost = new TextBox();
+            totalCost.IsReadOnly = true;
+            totalCost.HorizontalAlignment = HorizontalAlignment.Center;
+            totalCost.Name = "totalCost";
+            totalCost.Width = 75;
+            totalCost.Height = 25;
+            totalCost.TextWrapping = TextWrapping.NoWrap;
+            totalCost.Margin = new Thickness(-25, 10, 0, 0);
+            totalCost.TextAlignment = TextAlignment.Center;
+            stackTotalCost.Children.Add(totalCost);
         }
 
         private void PageSelectButtons(bool pageSelectButton)
@@ -302,6 +288,14 @@ namespace CdesPrintingPricer
                     pageCostBox.Margin = new Thickness(-25, 10, 0, 0);
                     pageCostBox.Text = "";
                     stackCostLayout.Children.Add(pageCostBox);
+                    if (documentPageCount == 1)
+                    {
+                        CalculateCost();
+                    }
+                    if (FindName("pageCostBox_" + stackCostLayout.Children.Count) != null)
+                    {
+                        UnregisterName("pageCostBox_" + stackCostLayout.Children.Count);
+                    }
                     this.RegisterName(string.Format("pageCostBox_" + stackCostLayout.Children.Count), pageCostBox);
                 }
             }
@@ -313,38 +307,50 @@ namespace CdesPrintingPricer
             var pageBox = sender as CheckBox;
             var pageLayout = pageBox.Parent as FrameworkElement;
             var name = (((CheckBox)sender).Name);
-            string nameId;
             nameId = Regex.Match(name, @"\d+").Value;
-            int i = Convert.ToInt32(nameId);
-            CalculateCost(i);
+            i = Convert.ToInt32(nameId);
+            CalculateCost();
         }
 
 
-        private void CalculateCost(int i)
+        private void CalculateCost()
         {
+
             TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
             i--;
             TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
             {
+                string pageDimension = pageSizeBox.Text;
+                string chargeDimension = pageDimension.Substring(0, pageDimension.LastIndexOf(" x") + 1);
+
                 if (chooseBond.IsChecked == true)
                 {
-                    double totalPageCost = costBond * (Convert.ToDouble(lengthToCharge) / 12);
-                    pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                    totalPageCost = costBond * (Convert.ToDouble(chargeDimension) / 12);
+                    totalPageCost = Math.Round(totalPageCost, 2);
+                    finalPageCost = Convert.ToDecimal(totalPageCost);
+                    Convert.ToString(totalPageCost);
+                    pageCostBox.Text = "$ " + string.Format("{0:f2}", totalPageCost);
                 }
 
                 else if (chooseMatte.IsChecked == true)
                 {
-                    double totalPageCost = costMatte * (Convert.ToDouble(lengthToCharge) / 12);
-                    pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                    totalPageCost = costMatte * (Convert.ToDouble(chargeDimension) / 12);
+                    totalPageCost = Math.Round(totalPageCost, 2);
+                    finalPageCost = Convert.ToDecimal(totalPageCost);
+                    Convert.ToString(totalPageCost);
+                    pageCostBox.Text = "$ " + string.Format("{0:f2}", totalPageCost);
                 }
 
                 else if (chooseSatin.IsChecked == true)
                 {
-                    double totalPageCost = costSatin * (Convert.ToDouble(lengthToCharge) / 12);
-                    pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
+                    totalPageCost = costSatin * (Convert.ToDouble(chargeDimension) / 12);
+                    totalPageCost = Math.Round(totalPageCost, 2);
+                    finalPageCost = Convert.ToDecimal(totalPageCost);
+                    Convert.ToString(totalPageCost);
+                    pageCostBox.Text = "$ " + string.Format("{0:f2}", totalPageCost);
                 }
-
             }
+
         }
 
         private void pageCost_Unchecked(object sender, RoutedEventArgs e)
@@ -352,13 +358,12 @@ namespace CdesPrintingPricer
             var pageBox = sender as CheckBox;
             var pageLayout = pageBox.Parent as FrameworkElement;
             var name = (((CheckBox)sender).Name);
-            string nameId;
             nameId = Regex.Match(name, @"\d+").Value;
-            int i = Convert.ToInt32(nameId);
-            ClearCost(nameId, i);
+            i = Convert.ToInt32(nameId);
+            ClearCost();
         }
 
-        private void ClearCost(string nameId, int i)
+        private void ClearCost()
         {
             TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
             i--;
@@ -369,7 +374,7 @@ namespace CdesPrintingPricer
             }
         }
 
-        private void UpdateCost(int i)
+        private void UpdateCost()
         {
             {
                 TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
@@ -380,19 +385,19 @@ namespace CdesPrintingPricer
                     {
                         if (chooseBond.IsChecked == true)
                         {
-                            double totalPageCost = costBond * (Convert.ToDouble(lengthToCharge) / 12);
+                            double totalPageCost = costBond * (Convert.ToDouble(12) / 12);
                             pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
                         }
 
                         else if (chooseMatte.IsChecked == true)
                         {
-                            double totalPageCost = costMatte * (Convert.ToDouble(lengthToCharge) / 12);
+                            double totalPageCost = costMatte * (Convert.ToDouble(12) / 12);
                             pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
                         }
 
                         else if (chooseSatin.IsChecked == true)
                         {
-                            double totalPageCost = costSatin * (Convert.ToDouble(lengthToCharge) / 12);
+                            double totalPageCost = costSatin * (Convert.ToDouble(12) / 12);
                             pageCostBox.Text = "$ " + Convert.ToString(totalPageCost);
                         }
                     }
@@ -402,55 +407,32 @@ namespace CdesPrintingPricer
 
         private void chooseBond_Checked(object sender, RoutedEventArgs e)
         {
-            int i = 0;
-            if (lengthToCharge != null)
-            {
-                foreach (TextBox pageCostBox in stackCostLayout.Children)
-                {
-
-                    UpdateCost(i);
-                    i++;
-
-                }
-            }
-
-
-
+            //foreach (TextBox pageCostBox in stackCostLayout.Children)
+            //{
+            //    UpdateCost();
+            //} 
         }
 
         private void chooseMatte_Checked(object sender, RoutedEventArgs e)
         {
-            if (dlg.FileName != null)
-            {
-                int i = 0;
-                if (lengthToCharge != null)
-                {
-                    foreach (TextBox pageCostBox in stackCostLayout.Children)
-                    {
-                        UpdateCost(i);
-                        i++;
-                    }
-                }
-            }
-
+            //if (dlg.FileName != null)
+            //{
+            //    foreach (TextBox pageCostBox in stackCostLayout.Children)
+            //    {
+            //        UpdateCost();
+            //    }  
+            //}
         }
 
         private void chooseSatin_Checked(object sender, RoutedEventArgs e)
         {
-            if (dlg.FileName != null)
-            {
-                int i = 0;
-                if (lengthToCharge != null)
-                {
-                    foreach (TextBox pageCostBox in stackCostLayout.Children)
-                    {
-
-                        UpdateCost(i);
-                        i++;
-
-                    }
-                }
-            }
+            //if (dlg.FileName != null)
+            //{
+            //    foreach (TextBox pageCostBox in stackCostLayout.Children)
+            //    {
+            //        UpdateCost();
+            //    }
+            //}
         }
 
         private void fileNameDisplay_TextChanged(object sender, TextChangedEventArgs e)
