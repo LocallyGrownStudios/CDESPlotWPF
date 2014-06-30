@@ -36,13 +36,14 @@ namespace CdesPrintingPricer
         double costMatte = 3.00;
         double costBond = 1.00;
         double totalPageCost;
-        string costNum;
-        string name;
+        decimal total;
         string[] listItems;
+        decimal[] cost2;
+        decimal sum;
         string fileState;
         int documentPageCount;
-        string hash;
         decimal finalPageCost;
+        decimal costTotal;
         const double postScriptPoints = 72.00;
         Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
@@ -320,6 +321,7 @@ namespace CdesPrintingPricer
                 foreach (TextBox pageSizeBox in stackPageLayout.Children.OfType<TextBox>().Where(t => t.Name.Equals("pageSizeBox_" + stackCostLayout.Children.Count)))
                 {
                     TextBox pageCostBox = new TextBox();
+                    pageCostBox.IsReadOnly = true;
                     pageCostBox.Name = "pageCostBox_" + stackCostLayout.Children.Count;
                     pageCostBox.HorizontalAlignment = HorizontalAlignment.Center;
                     pageCostBox.TextAlignment = TextAlignment.Center;
@@ -349,7 +351,6 @@ namespace CdesPrintingPricer
             var name = (((CheckBox)sender).Name);
             nameId = Regex.Match(name, @"\d+").Value;
             i = Convert.ToInt32(nameId);
-            hash = null;
             CalculateCost();
             listItems = new string[stackCostLayout.Children.Count];
             UpdateTotalCost();
@@ -460,27 +461,47 @@ namespace CdesPrintingPricer
             }
         }
 
+        static decimal SumCost(decimal a1, decimal a2)
+        {
+            decimal totalToCharge = (a1 + a2) / 2;
+            return totalToCharge;
+        }
 
         private void UpdateTotalCost()
         {
             TextBox totalCost = (TextBox)this.FindName("totalCost");
             i = Convert.ToInt32(nameId);
-            foreach (TextBox pageCost in stackCostLayout.Children)
             {
-                if (pageCost.Text != "")
+                TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
+                TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+                listItems[i] = pageCostBox.Text.ToString();
+                string cost = listItems[i].Remove(0, 2);
+                cost2 = new decimal[stackCostLayout.Children.Count];
+                cost2[i] += Convert.ToDecimal(cost);
+                sum = cost2[i];
+                decimal a1 = Convert.ToDecimal(sum);
+                decimal a2 = Convert.ToDecimal(cost2[i]);
+                costTotal = SumCost(a1, a2);
+
+                foreach (CheckBox check in stackButtonLayout.Children)
                 {
-                    TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
-                    TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
-                    listItems[i] = pageCostBox.Text.ToString();
-                    debugOutput.Text = "value " + i + " is " + listItems[i] + "\n";
+                        if (check.IsChecked == true)
+                        {
+                            total = cost2.Sum();
+                            debugOutput.Text = "value " + i + " is " + costTotal + "\n";
+                        }
+                        else
+                        {
+                            debugOutput.Text = "value " + i + " is " + costTotal + "\n";
+                        }
+                    }
                 }
             }
-        }
 
 
         private void UpdateTotalCostUnChecked()
         {
-            TextBox totalCost = (TextBox)this.FindName("totalCost");;
+            TextBox totalCost = (TextBox)this.FindName("totalCost"); ;
             foreach (TextBox pageCost in stackCostLayout.Children)
             {
                 if (pageCost.Text != "")
@@ -504,7 +525,7 @@ namespace CdesPrintingPricer
                 {
                     UpdateCost();
                     i++;
-                        UpdateTotalCost();
+                    UpdateTotalCost();
                 }
             }
         }
@@ -519,8 +540,8 @@ namespace CdesPrintingPricer
                 {
                     UpdateCost();
                     i++;
-                        UpdateTotalCost();
-                }  
+                    UpdateTotalCost();
+                }
             }
         }
 
@@ -539,7 +560,7 @@ namespace CdesPrintingPricer
             }
         }
 
-  
+
 
         private void fileNameDisplay_TextChanged(object sender, TextChangedEventArgs e)
         {
