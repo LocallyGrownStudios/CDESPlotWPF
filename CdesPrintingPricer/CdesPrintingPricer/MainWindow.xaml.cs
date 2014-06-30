@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -12,7 +13,6 @@ using org.pdfclown.documents;
 using io = System.IO;
 // TO DO
 // Add Pdf Portfolio Support
-// Add Total Cost Box
 // Add functionality to manually enter data, a calculator
 // Add functionality for multiple file selection, place in own container for auto population
 // Add functionality to populate individual containers for each file
@@ -36,20 +36,17 @@ namespace CdesPrintingPricer
         double costMatte = 3.00;
         double costBond = 1.00;
         double totalPageCost;
-        decimal total;
         string[] listItems;
-        decimal[] cost2;
-        decimal sum;
         string fileState;
         int documentPageCount;
         decimal finalPageCost;
-        decimal costTotal;
         const double postScriptPoints = 72.00;
         Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
         public MainWindow()
         {
             InitializeComponent();
+
 
         }
 
@@ -352,7 +349,21 @@ namespace CdesPrintingPricer
             nameId = Regex.Match(name, @"\d+").Value;
             i = Convert.ToInt32(nameId);
             CalculateCost();
-            listItems = new string[stackCostLayout.Children.Count];
+
+
+            // WORKING, add to code and return total..................
+
+            //ArrayList list = new ArrayList();
+            //foreach (TextBox xxx in stackCostLayout.Children)
+            //{
+            //    list.Add(xxx.Text);
+            //}
+            //for (int x = 0; x < list.Count; x++)
+            //{
+            //    debugOutput.Text += Convert.ToString(list[x]);
+            //}
+
+
             UpdateTotalCost();
         }
 
@@ -366,7 +377,6 @@ namespace CdesPrintingPricer
             i = Convert.ToInt32(nameId);
             ClearCost();
             listItems = new string[stackCostLayout.Children.Count];
-            UpdateTotalCostUnChecked();
         }
 
 
@@ -415,6 +425,7 @@ namespace CdesPrintingPricer
                 TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
                 i--;
                 TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+                i++;
                 if (pageCostBox.Text != "")
                 {
                     string pageDimension = pageSizeBox.Text;
@@ -471,47 +482,9 @@ namespace CdesPrintingPricer
         {
             TextBox totalCost = (TextBox)this.FindName("totalCost");
             i = Convert.ToInt32(nameId);
-            {
-                TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
-                TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
-                listItems[i] = pageCostBox.Text.ToString();
-                string cost = listItems[i].Remove(0, 2);
-                cost2 = new decimal[stackCostLayout.Children.Count];
-                cost2[i] += Convert.ToDecimal(cost);
-                sum = cost2[i];
-                decimal a1 = Convert.ToDecimal(sum);
-                decimal a2 = Convert.ToDecimal(cost2[i]);
-                costTotal = SumCost(a1, a2);
-
-                foreach (CheckBox check in stackButtonLayout.Children)
-                {
-                        if (check.IsChecked == true)
-                        {
-                            total = cost2.Sum();
-                            debugOutput.Text = "value " + i + " is " + costTotal + "\n";
-                        }
-                        else
-                        {
-                            debugOutput.Text = "value " + i + " is " + costTotal + "\n";
-                        }
-                    }
-                }
-            }
-
-
-        private void UpdateTotalCostUnChecked()
-        {
-            TextBox totalCost = (TextBox)this.FindName("totalCost"); ;
-            foreach (TextBox pageCost in stackCostLayout.Children)
-            {
-                if (pageCost.Text != "")
-                {
-                    TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
-                    TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
-                    listItems[i] = pageCostBox.Text.ToString();
-                    debugOutput.Text = "value " + i + " is " + listItems[i] + "\n";
-                }
-            }
+            TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
+            TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
+            
         }
 
 
@@ -525,7 +498,6 @@ namespace CdesPrintingPricer
                 {
                     UpdateCost();
                     i++;
-                    UpdateTotalCost();
                 }
             }
         }
@@ -540,7 +512,6 @@ namespace CdesPrintingPricer
                 {
                     UpdateCost();
                     i++;
-                    UpdateTotalCost();
                 }
             }
         }
@@ -555,7 +526,6 @@ namespace CdesPrintingPricer
                 {
                     UpdateCost();
                     i++;
-                    UpdateTotalCost();
                 }
             }
         }
