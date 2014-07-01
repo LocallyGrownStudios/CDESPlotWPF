@@ -30,8 +30,12 @@ namespace CdesPrintingPricer
     {
 
         int i;
+        string sumCost;
         string nameId;
         int numPages;
+        decimal xxz;
+        string xxy;
+        decimal gotAtIt;
         double costSatin = 3.00;
         double costMatte = 3.00;
         double costBond = 1.00;
@@ -353,18 +357,45 @@ namespace CdesPrintingPricer
 
             // WORKING, add to code and return total..................
 
-            //ArrayList list = new ArrayList();
-            //foreach (TextBox xxx in stackCostLayout.Children)
-            //{
-            //    list.Add(xxx.Text);
-            //}
-            //for (int x = 0; x < list.Count; x++)
-            //{
-            //    debugOutput.Text += Convert.ToString(list[x]);
-            //}
+            ArrayList list = new ArrayList(999999);
 
+            foreach (TextBox xxx in stackCostLayout.Children)
+            {
+                xxy = xxx.Text.Trim(new char[] { '$' });
+                if (xxx.Text != "")
+                {
+                    xxz = Convert.ToDecimal(xxy);
+                    list.Add(xxz);
+
+                }
+            }
+            for (int x = 0; x < list.Count; x++)
+            {
+                Swashbuckler(list);
+                debugOutput.Text = Convert.ToString(gotAtIt);
+            }
+
+
+            // .....................................................
 
             UpdateTotalCost();
+        }
+
+        decimal Swashbuckler(ArrayList list)
+        {
+            
+            decimal[] getAtIt = new decimal[stackCostLayout.Children.Count];
+            for (int x = 0; x < list.Count; x++)
+            {
+                getAtIt[x] = Convert.ToDecimal(list[x]);
+                gotAtIt = getAtIt.Sum();
+            }
+
+
+            return
+
+            gotAtIt;
+
         }
 
         private void pageCost_Unchecked(object sender, RoutedEventArgs e)
@@ -472,11 +503,6 @@ namespace CdesPrintingPricer
             }
         }
 
-        static decimal SumCost(decimal a1, decimal a2)
-        {
-            decimal totalToCharge = (a1 + a2) / 2;
-            return totalToCharge;
-        }
 
         private void UpdateTotalCost()
         {
@@ -484,7 +510,7 @@ namespace CdesPrintingPricer
             i = Convert.ToInt32(nameId);
             TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
             TextBox pageSizeBox = (TextBox)this.FindName(string.Format("pageSizeBox_{0}", i + 1));
-            
+
         }
 
 
