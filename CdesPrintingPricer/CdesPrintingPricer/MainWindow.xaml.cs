@@ -30,12 +30,11 @@ namespace CdesPrintingPricer
     {
 
         int i;
-        string sumCost;
         string nameId;
         int numPages;
-        decimal xxz;
-        string xxy;
-        decimal gotAtIt;
+        decimal decPageCost;
+        string strPageCost;
+        decimal decTotalCost;
         double costSatin = 3.00;
         double costMatte = 3.00;
         double costBond = 1.00;
@@ -353,48 +352,39 @@ namespace CdesPrintingPricer
             nameId = Regex.Match(name, @"\d+").Value;
             i = Convert.ToInt32(nameId);
             CalculateCost();
-
-
-            // WORKING, add to code and return total..................
-
-            ArrayList list = new ArrayList(999999);
-
-            foreach (TextBox xxx in stackCostLayout.Children)
+            ArrayList list = new ArrayList(1000);
+            foreach (TextBox pageCost in stackCostLayout.Children)
             {
-                xxy = xxx.Text.Trim(new char[] { '$' });
-                if (xxx.Text != "")
+                strPageCost = pageCost.Text.Trim(new char[] { '$' });
+                if (pageCost.Text != "")
                 {
-                    xxz = Convert.ToDecimal(xxy);
-                    list.Add(xxz);
-
+                    decPageCost = Convert.ToDecimal(strPageCost);
+                    list.Add(decPageCost);
                 }
             }
             for (int x = 0; x < list.Count; x++)
             {
-                Swashbuckler(list);
-                debugOutput.Text = Convert.ToString(gotAtIt);
+                CalcTotalCost(list);
+                totalCost.Text = "$" + Convert.ToString(decTotalCost);
             }
-
-
-            // .....................................................
-
             UpdateTotalCost();
         }
 
-        decimal Swashbuckler(ArrayList list)
+
+        decimal CalcTotalCost(ArrayList list)
         {
-            
-            decimal[] getAtIt = new decimal[stackCostLayout.Children.Count];
+
+            decimal[] decSubCost = new decimal[stackCostLayout.Children.Count];
             for (int x = 0; x < list.Count; x++)
             {
-                getAtIt[x] = Convert.ToDecimal(list[x]);
-                gotAtIt = getAtIt.Sum();
+                decSubCost[x] = Convert.ToDecimal(list[x]);
+                decTotalCost = decSubCost.Sum();
             }
 
 
             return
 
-            gotAtIt;
+            decTotalCost;
 
         }
 
@@ -407,7 +397,22 @@ namespace CdesPrintingPricer
             nameId = Regex.Match(name, @"\d+").Value;
             i = Convert.ToInt32(nameId);
             ClearCost();
-            listItems = new string[stackCostLayout.Children.Count];
+            ArrayList list = new ArrayList(1000);
+            foreach (TextBox pageCost in stackCostLayout.Children)
+            {
+                strPageCost = pageCost.Text.Trim(new char[] { '$' });
+                if (pageCost.Text != "")
+                {
+                    decPageCost = Convert.ToDecimal(strPageCost);
+                    list.Add(decPageCost);
+                }
+            }
+            for (int x = 0; x < list.Count; x++)
+            {
+                CalcTotalCost(list);
+                totalCost.Text = "$" + Convert.ToString(decTotalCost);
+            }
+            UpdateTotalCost();
         }
 
 
@@ -519,26 +524,62 @@ namespace CdesPrintingPricer
             i = 0;
             if (numPages != 0)
             {
+                TextBox totalCost = (TextBox)this.FindName("totalCost");
                 TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
                 foreach (TextBox box in stackCostLayout.Children)
                 {
                     UpdateCost();
-                    i++;
+                    ArrayList list = new ArrayList(1000);
+                    foreach (TextBox pageCost in stackCostLayout.Children)
+                    {
+                        strPageCost = pageCost.Text.Trim(new char[] { '$' });
+                        if (pageCost.Text != "")
+                        {
+                            decPageCost = Convert.ToDecimal(strPageCost);
+                            list.Add(decPageCost);
+                        }
+                    }
+                    for (int x = 0; x < list.Count; x++)
+                    {
+                        CalcTotalCost(list);
+                        totalCost.Text = "$" + Convert.ToString(decTotalCost);
+                    }
+                    UpdateTotalCost();
                 }
+                i++;
             }
         }
+
+
 
         private void chooseMatte_Checked(object sender, RoutedEventArgs e)
         {
             i = 0;
             if (numPages != 0)
             {
+                TextBox totalCost = (TextBox)this.FindName("totalCost");
                 TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
                 foreach (TextBox box in stackCostLayout.Children)
                 {
                     UpdateCost();
-                    i++;
+                    ArrayList list = new ArrayList(1000);
+                    foreach (TextBox pageCost in stackCostLayout.Children)
+                    {
+                        strPageCost = pageCost.Text.Trim(new char[] { '$' });
+                        if (pageCost.Text != "")
+                        {
+                            decPageCost = Convert.ToDecimal(strPageCost);
+                            list.Add(decPageCost);
+                        }
+                    }
+                    for (int x = 0; x < list.Count; x++)
+                    {
+                        CalcTotalCost(list);
+                        totalCost.Text = "$" + Convert.ToString(decTotalCost);
+                    }
+                    UpdateTotalCost();
                 }
+                i++;
             }
         }
 
@@ -547,12 +588,29 @@ namespace CdesPrintingPricer
             i = 0;
             if (numPages != 0)
             {
+                TextBox totalCost = (TextBox)this.FindName("totalCost");
                 TextBox pageCostBox = (TextBox)this.FindName(string.Format("pageCostBox_{0}", i + 1));
                 foreach (TextBox box in stackCostLayout.Children)
                 {
                     UpdateCost();
-                    i++;
+                    ArrayList list = new ArrayList(1000);
+                    foreach (TextBox pageCost in stackCostLayout.Children)
+                    {
+                        strPageCost = pageCost.Text.Trim(new char[] { '$' });
+                        if (pageCost.Text != "")
+                        {
+                            decPageCost = Convert.ToDecimal(strPageCost);
+                            list.Add(decPageCost);
+                        }
+                    }
+                    for (int x = 0; x < list.Count; x++)
+                    {
+                        CalcTotalCost(list);
+                        totalCost.Text = "$ " + Convert.ToString(decTotalCost);
+                    }
+                    UpdateTotalCost();
                 }
+                i++;
             }
         }
 
